@@ -9,7 +9,7 @@ import { FocusTimer } from './components/focus-timer';
 import { Insights } from './components/insights';
 import { Settings } from './components/settings';
 import { toast } from 'sonner';
-import { AuthPage } from './components/Authpage';
+import AuthPage from './components/Authpage';
 
 type Screen = 'dashboard' | 'progress' | 'focus' | 'insights' | 'settings';
 
@@ -20,7 +20,7 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [authStage, setAuthStage] = useState<'auth' | 'onboarding' | 'app'>(() => {
     return (localStorage.getItem('authStage') as 'auth' | 'onboarding' | 'app') || 'auth';
   });
@@ -153,7 +153,6 @@ export default function App() {
               className="w-72 flex-shrink-0 border-r border-white/20 dark:border-slate-700/50 backdrop-blur-xl bg-white/30 dark:bg-slate-900/30"
             >
               <SidebarNav
-                user={user}
                 onQuickAction={(action) => console.log(action)}
                 onLogout={() => setAuthStage('auth')}
               />

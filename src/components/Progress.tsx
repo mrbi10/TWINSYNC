@@ -8,6 +8,9 @@ import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { toast } from 'sonner';
 import { BASE_URL } from '../constants/API';
+import Swal from 'sweetalert2';
+import "../app.css";
+
 
 interface AddProgressProps {
   onBack: () => void;
@@ -20,7 +23,7 @@ export interface DailyProgressData {
   date: string;
   mood: 'great' | 'good' | 'okay' | 'bad' | 'terrible';
   moodNotes: string;
-  waterIntake: number; 
+  waterIntake: number;
   foodLog: string;
   hadBreakfast: boolean;
   hadLunch: boolean;
@@ -34,7 +37,8 @@ export interface DailyProgressData {
 }
 
 export function Progress({ onBack, onSave }: AddProgressProps) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  console.log("Today's date:", today);
   const userId = JSON.parse(localStorage.getItem('user') || '{}');
   const [formData, setFormData] = useState<DailyProgressData>(() => {
     const saved = localStorage.getItem(`twinsync_progress_${today}`);
@@ -61,47 +65,57 @@ export function Progress({ onBack, onSave }: AddProgressProps) {
 
 
 
-
   const moods = [
-    { value: 'great' as const, emoji: '😄', label: 'Great', color: 'from-emerald-500 to-green-500' },
-    { value: 'good' as const, emoji: '😊', label: 'Good', color: 'from-blue-500 to-cyan-500' },
-    { value: 'okay' as const, emoji: '😐', label: 'Okay', color: 'from-yellow-500 to-amber-500' },
-    { value: 'bad' as const, emoji: '😟', label: 'Bad', color: 'from-orange-500 to-red-500' },
-    { value: 'terrible' as const, emoji: '😢', label: 'Terrible', color: 'from-red-600 to-rose-600' }
+    { value: 'great', emoji: '😄', label: 'Great' },
+    { value: 'good', emoji: '😊', label: 'Good' },
+    { value: 'okay', emoji: '😐', label: 'Okay' },
+    { value: 'bad', emoji: '😟', label: 'Bad' },
+    { value: 'terrible', emoji: '😢', label: 'Terrible' },
   ];
 
-const handleSave = async () => {
-  try {
-    const today = new Date().toISOString().split("T")[0]; 
 
-    const payload = {
-      user_id: userId.id,
-      ...formData
-    };
+  const handleSave = async () => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
 
-    const res = await fetch(`${BASE_URL}/api/daily-progress`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+      const payload = {
+        user_id: userId.id,
+        ...formData
+      };
 
-    const data = await res.json();
-
-    if (res.ok) {
-      toast.success("Progress saved successfully!", {
-        description: data.message
+      const res = await fetch(`${BASE_URL}/api/daily-progress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
-      localStorage.setItem(`twinsync_progress_${today}`, JSON.stringify(formData));
-      onSave(formData);
-      onBack();
-    } else {
-      toast.error("Failed to save progress", { description: data.message });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem(`twinsync_progress_${today}`, JSON.stringify(formData));
+        onSave(formData);
+
+        Swal.fire({
+          title: 'Progress Updated',
+          text: "Your today's data has been saved successfully!",
+          icon: 'success',
+          background: 'rgba(255,255,255,0.95)',
+          color: '#1e293b',
+          confirmButtonColor: '#8b5cf6',
+          confirmButtonText: 'Nice!',
+          backdrop: `rgba(0,0,0,0.5)`,
+        });
+
+        onBack();
+      }
+      else {
+        toast.error("Failed to save progress", { description: data.message });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Server error while saving progress");
     }
-  } catch (error) {
-    console.error(error);
-    toast.error("Server error while saving progress");
-  }
-};
+  };
 
 
 
@@ -118,14 +132,14 @@ const handleSave = async () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-4"
       >
-        {/* <Button
+        <Button
           onClick={onBack}
           variant="ghost"
           className="rounded-2xl backdrop-blur-xl bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
-        </Button> */}
+        </Button>
         <div>
           <h2 className="text-2xl text-slate-800 dark:text-white">Add Today's Progress</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -151,16 +165,23 @@ const handleSave = async () => {
             <button
               key={mood.value}
               onClick={() => updateField('mood', mood.value)}
-              className={`flex-1 min-w-[100px] p-4 rounded-2xl border-2 transition-all duration-300 ${formData.mood === mood.value
-                ? `bg-gradient-to-br ${mood.color} border-white text-white scale-105`
-                : 'backdrop-blur-xl bg-white/50 dark:bg-slate-800/50 border-white/30 dark:border-slate-700/30 hover:scale-105'
+              className={`flex-1 min-w-[100px] p-4 rounded-2xl border-2 transition-all duration-300 mood-button
+    ${formData.mood === mood.value
+                  ? `mood-${mood.value} border-white text-white scale-105`
+                  : 'backdrop-blur-xl bg-white/50 dark:bg-slate-800/50 border-white/30 dark:border-slate-700/30 hover:scale-105'
                 }`}
             >
               <div className="text-3xl mb-2">{mood.emoji}</div>
-              <div className={`text-sm ${formData.mood === mood.value ? 'text-white' : 'text-slate-700 dark:text-slate-200'}`}>
+              <div
+                className={`text-sm ${formData.mood === mood.value
+                  ? 'text-white'
+                  : 'text-slate-700 dark:text-slate-200'
+                  }`}
+              >
                 {mood.label}
               </div>
             </button>
+
           ))}
         </div>
 
@@ -382,22 +403,21 @@ const handleSave = async () => {
         </div>
       </motion.div>
 
+
+
       {/* Save Button */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
         className="flex justify-end gap-4"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 300, damping: 15 }}
       >
-        <Button
-          onClick={onBack}
-          variant="ghost"
-          className="rounded-2xl backdrop-blur-xl bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30"
-        >
-          Cancel
-        </Button>
+
         <Button
           onClick={handleSave}
+          pointer="select"
           className="rounded-2xl bg-gradient-to-r from-violet-500 to-purple-500 text-white hover:from-violet-600 hover:to-purple-600"
         >
           <Save className="w-4 h-4 mr-2" />
