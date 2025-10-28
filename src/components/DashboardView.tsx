@@ -5,7 +5,7 @@ import { Progress } from './ui/progress';
 import { Activity } from '../types';
 import { useState } from 'react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import medicalIllustration from 'figma:asset/f7c78693582f55d877af3b344bc58cfc7d461b8f.png';
+// import medicalIllustration from 'figma:asset/f7c78693582f55d877af3b344bc58cfc7d461b8f.png';
 
 interface DashboardViewProps {
   balanceScore: number;
