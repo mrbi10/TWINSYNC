@@ -201,7 +201,6 @@ export function Dashboard() {
               hydrationLevel={latest.hydrationPercent || 0}
               sleepQuality={latest.sleepGoalPercent || 0}
               focusHours={latest.focusHours || 0}
-              mood={selectedMood}
               onCelebrate={celebrate}
             />
           </div>

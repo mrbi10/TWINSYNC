@@ -65,7 +65,7 @@ export function Progress({ onBack, onSave }: AddProgressProps) {
 
 
 
-  const moods = [
+  const moods: { value: DailyProgressData['mood']; emoji: string; label: string }[] = [
     { value: 'great', emoji: '😄', label: 'Great' },
     { value: 'good', emoji: '😊', label: 'Good' },
     { value: 'okay', emoji: '😐', label: 'Okay' },
